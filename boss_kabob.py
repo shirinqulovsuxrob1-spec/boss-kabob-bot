@@ -1,35 +1,17 @@
 import os
 import asyncio
-import threading
-from flask import Flask
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-# --- 1. RENDER UCHUN VEB-SERVER (KEEP ALIVE) ---
-app = Flask('')
-
-@app.route('/')
-def home():
-    return "Boss Kabob bot is running!"
-
-def run_web():
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host='0.0.0.0', port=port)
-
-def keep_alive():
-    t = threading.Thread(target=run_web)
-    t.daemon = True
-    t.start()
-
-# --- 2. BOT SOZLAMALARI ---
-# Tokenni Render Settings -> Environment Variables bo'limiga BOT_TOKEN nomi bilan qo'shing
+# --- 1. BOT SOZLAMALARI ---
+# Token GitHub Secrets-dan olinadi
 API_TOKEN = os.getenv('BOT_TOKEN', '8684776752:AAGBgXRQZSKxeBOkqJKObnF7xkntk257gls')
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
-# --- 3. KEYBOARDLAR (TUGMALAR) ---
+# --- 2. KEYBOARDLAR (TUGMALAR) ---
 main_menu = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="🍴 Menyu")],
@@ -48,7 +30,7 @@ menu_detail = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
-# --- 4. HANDLERLAR (BOT VAZIFALARI) ---
+# --- 3. HANDLERLAR (BOT VAZIFALARI) ---
 
 @dp.message(Command("start"))
 async def send_welcome(message: types.Message):
@@ -149,10 +131,9 @@ async def contact_us(message: types.Message):
 async def go_back(message: types.Message):
     await message.answer("Asosiy menyu:", reply_markup=main_menu)
 
-# --- 5. ASOSIY ISHGA TUSHIRISH ---
+# --- 4. ASOSIY ISHGA TUSHIRISH ---
 async def main():
-    print("Bot Render-da ishga tushmoqda...")
-    keep_alive() # Render uchun veb-serverni yoqish
+    print("Bot GitHub Actions-da ishlamoqda...")
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
