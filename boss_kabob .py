@@ -1,15 +1,35 @@
+import os
 import asyncio
+import threading
+from flask import Flask
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-# Bot tokenini @BotFather dan olib shu yerga qo'ying
-API_TOKEN = '8684776752:AAGBgXRQZSKxeBOkqJKObnF7xkntk257gls'
+# --- 1. RENDER UCHUN VEB-SERVER (KEEP ALIVE) ---
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Boss Kabob bot is running!"
+
+def run_web():
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
+
+def keep_alive():
+    t = threading.Thread(target=run_web)
+    t.daemon = True
+    t.start()
+
+# --- 2. BOT SOZLAMALARI ---
+# Tokenni Render Settings -> Environment Variables bo'limiga BOT_TOKEN nomi bilan qo'shing
+API_TOKEN = os.getenv('BOT_TOKEN', '8684776752:AAGBgXRQZSKxeBOkqJKObnF7xkntk257gls')
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
-# --- Asosiy Menu (Savat olib tashlandi) ---
+# --- 3. KEYBOARDLAR (TUGMALAR) ---
 main_menu = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="🍴 Menyu")],
@@ -18,7 +38,6 @@ main_menu = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
-# --- Taomlar Kategoriyasi ---
 menu_detail = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="🌯 Lavash"), KeyboardButton(text="🍔 Burgerlar")],
@@ -29,11 +48,12 @@ menu_detail = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
+# --- 4. HANDLERLAR (BOT VAZIFALARI) ---
+
 @dp.message(Command("start"))
 async def send_welcome(message: types.Message):
-    await message.answer("Boss Kabob botiga xush kelibsiz!", reply_markup=main_menu)
+    await message.answer("Boss Kabob botiga xush kelibsiz! 😊", reply_markup=main_menu)
 
-# --- Menyu handlerlari ---
 @dp.message(F.text == "🍴 Menyu")
 async def show_menu(message: types.Message):
     await message.answer("Kategoriyani tanlang:", reply_markup=menu_detail)
@@ -42,12 +62,12 @@ async def show_menu(message: types.Message):
 async def show_lavash(message: types.Message):
     text = (
         "🌯 **Lavash menyusi:**\n\n"
-        "• Lavash mol go'shtli — 35,000 so'm\n"
-        "• Lavash mol go'shtli sirli — 40,000 so'm\n"
-        "• Lavash mol go'shtli katta — 45,000 so'm\n"
-        "• Lavash tovuqli — 32,000 so'm\n"
-        "• Lavash pishloqli tovuqli — 36,000 so'm\n"
-        "• Katta lavash tovuqli — 38,000 so'm"
+        "• Mol go'shtli — 35,000 so'm\n"
+        "• Mol go'shtli sirli — 40,000 so'm\n"
+        "• Mol go'shtli katta — 45,000 so'm\n"
+        "• Tovuqli — 32,000 so'm\n"
+        "• Pishloqli tovuqli — 36,000 so'm\n"
+        "• Katta tovuqli — 38,000 so'm"
     )
     await message.answer(text, parse_mode="Markdown")
 
@@ -109,12 +129,11 @@ async def show_drinks(message: types.Message):
     )
     await message.answer(text, parse_mode="Markdown")
 
-# --- Manzil va Aloqa ---
 @dp.message(F.text == "📍 Manzil")
 async def send_location(message: types.Message):
     lat, lon = 40.105335, 65.373357
     await message.answer("📍 **Bizning manzilimiz:**\nBoss Kabob (Navoiy).")
-    await message.answer_location(latitude=lat, longitude=lon)
+    await bot.send_location(chat_id=message.chat.id, latitude=lat, longitude=lon)
 
 @dp.message(F.text == "📞 Biz bilan aloqa")
 async def contact_us(message: types.Message):
@@ -130,11 +149,14 @@ async def contact_us(message: types.Message):
 async def go_back(message: types.Message):
     await message.answer("Asosiy menyu:", reply_markup=main_menu)
 
+# --- 5. ASOSIY ISHGA TUSHIRISH ---
 async def main():
+    print("Bot Render-da ishga tushmoqda...")
+    keep_alive() # Render uchun veb-serverni yoqish
     await dp.start_polling(bot)
 
 if __name__ == '__main__':
     try:
         asyncio.run(main())
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
         print("Bot to'xtatildi")
