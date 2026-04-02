@@ -6,7 +6,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 # --- 1. BOT SOZLAMALARI ---
 # Token GitHub Secrets-dan olinadi
-API_TOKEN = os.getenv('BOT_TOKEN', '8684776752:AAGBgXRQZSKxeBOkqJKObnF7xkntk257gls')
+API_TOKEN = os.getenv('BOT_TOKEN', '8684776752:AAFR-9G-uQE4W6VYzZu5a9VF22yN6BChABY')
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
