@@ -1,12 +1,11 @@
-import os
 import asyncio
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 # --- 1. BOT SOZLAMALARI ---
-# Token GitHub Secrets-dan olinadi
-API_TOKEN = os.getenv('BOT_TOKEN', '8684776752:AAFR-9G-uQE4W6VYzZu5a9VF22yN6BChABY')
+# BotFather bergan yangi tokenni shu yerga qo'ying:
+API_TOKEN = '8684776752:AAFR-9G-uQE4W6VYzZu5a9VF22yN6BChABY' 
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
